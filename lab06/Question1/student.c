@@ -9,11 +9,22 @@
 
 
 
-
 int count_edges(Graph* g) {
-    // TODO: implement
-    // return -1;
 
+    int count = 0;
+
+    // loop through adjacency matrix
+    for (int i = 0; i < g->num_nodes; i++) {
+        for (int j = 0; j < g->num_nodes; j++) {
+
+            if (g->adj[i][j] == 1) {
+                count++;
+            }
+        }
+    }
+
+    // each edge counted twice
+    return count / 2;
 }
 
 
