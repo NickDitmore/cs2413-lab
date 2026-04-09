@@ -30,11 +30,7 @@ As you scan the array, for each nums[i], think about whether the value
 #include <stdlib.h>
 
 /*
-Optional helper structure for a hash table entry.
-
-You may use this structure if you want to build your own hash table.
-key   -> the number from the array
-value -> the index of that number
+Hash table node
 */
 typedef struct Node {
     int key;
@@ -42,61 +38,114 @@ typedef struct Node {
     struct Node* next;
 } Node;
 
-/*
-Optional table size for a simple hash table implementation.
-You may change this value if needed.
-*/
 #define TABLE_SIZE 1009
 
-/*
-Optional helper function declarations.
-
-You may use them, modify them, or remove them if you prefer your own design.
-*/
+/* Helper declarations */
 static int hash(int key);
 static void insert(Node* table[], int key, int value);
 static int find(Node* table[], int key, int* value);
 static void freeTable(Node* table[]);
 
+
 /*
-Return an array of size 2 containing the indices of the two numbers
-whose sum equals target.
+Return indices of two numbers that add to target
 */
 int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
-    /* Write your code here */
+
+    Node* table[TABLE_SIZE];
+
+    /* initialize table */
+    for (int i = 0; i < TABLE_SIZE; i++)
+        table[i] = NULL;
+
+    for (int i = 0; i < numsSize; i++) {
+
+        int complement = target - nums[i];
+        int foundIndex;
+
+        /* check if complement already exists */
+        if (find(table, complement, &foundIndex)) {
+            int* result = (int*)malloc(2 * sizeof(int));
+            result[0] = foundIndex;
+            result[1] = i;
+
+            *returnSize = 2;
+
+            freeTable(table);
+            return result;
+        }
+
+        /* otherwise insert current number */
+        insert(table, nums[i], i);
+    }
 
     *returnSize = 0;
+    freeTable(table);
     return NULL;
 }
 
+
 /*
-Optional helper: compute a hash index for a key.
+Hash function
+Handles negative numbers safely
 */
 static int hash(int key) {
-    /* Write your code here if you use this helper */
-    return 0;
+    if (key < 0)
+        key = -key;
+
+    return key % TABLE_SIZE;
 }
 
+
 /*
-Optional helper: insert (key, value) into the hash table.
+Insert key -> value into hash table
 */
 static void insert(Node* table[], int key, int value) {
-    /* Write your code here if you use this helper */
+
+    int index = hash(key);
+
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->key = key;
+    newNode->value = value;
+
+    newNode->next = table[index];
+    table[index] = newNode;
 }
 
+
 /*
-Optional helper: search for key in the hash table.
-If found, store the associated value in *value and return 1.
-Otherwise return 0.
+Find key in hash table
+Return 1 if found, 0 otherwise
 */
 static int find(Node* table[], int key, int* value) {
-    /* Write your code here if you use this helper */
+
+    int index = hash(key);
+    Node* current = table[index];
+
+    while (current != NULL) {
+        if (current->key == key) {
+            *value = current->value;
+            return 1;
+        }
+        current = current->next;
+    }
+
     return 0;
 }
 
+
 /*
-Optional helper: free all memory used by the hash table.
+Free memory used by table
 */
 static void freeTable(Node* table[]) {
-    /* Write your code here if you use this helper */
+
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        Node* current = table[i];
+
+        while (current != NULL) {
+            Node* temp = current;
+            current = current->next;
+            free(temp);
+        }
+    }
 }
